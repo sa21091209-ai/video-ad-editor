@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Tajawal"; src: url("fonts/Tajawal-Regular.ttf"); font-weight: 400; }
+      @font-face { font-family: "Tajawal"; src: url("fonts/Tajawal-Bold.ttf"); font-weight: 700; }
+      @font-face { font-family: "Tajawal"; src: url("fonts/Tajawal-Black.ttf"); font-weight: 900; }
+      @font-face { font-family: "Lalezar"; src: url("fonts/Lalezar-Regular.ttf"); }
+      @font-face { font-family: "AmiriQuran"; src: url("fonts/AmiriQuran-Regular.ttf"); }
+      :root {
+        --bg: #0b1322;
+        --ink: #f7f1e5;
+        --mut: #9fb0c8;
+        --acc: #f0b93f;
+        --acc2: #34c6b5;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; font-family: "Tajawal", sans-serif; color: var(--ink); direction: rtl; }
+      .clip { position: absolute; inset: 0; }
+      .center { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+      /* ---------- hook ---------- */
+      #hook { background: radial-gradient(120% 80% at 50% 40%, #1d3459 0%, var(--bg) 70%); }
+      #hook-rays { position: absolute; inset: -300px; background: repeating-conic-gradient(from 0deg at 50% 50%, rgba(240,185,63,0.07) 0deg 6deg, transparent 6deg 18deg); }
+      #hook-kicker { position: relative; font-weight: 700; font-size: 40px; color: var(--acc2); margin-bottom: 40px; }
+      .hook-line { position: relative; display: flex; gap: 26px; justify-content: center; }
+      .hw { display: block; font-family: "Lalezar", "Tajawal", sans-serif; font-size: 150px; line-height: 1.25; color: var(--ink); text-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+      .hw.hot { color: var(--acc); }
+      #hook-under { position: relative; width: 520px; height: 12px; border-radius: 6px; background: var(--acc); margin-top: 30px; transform-origin: right center; }
+
+      /* ---------- speaker placeholder (real episode footage goes here) ---------- */
+      #speaker { overflow: hidden; }
+      #studio { position: absolute; inset: -60px; background:
+          radial-gradient(40% 30% at 20% 25%, rgba(240,185,63,0.25), transparent 70%),
+          radial-gradient(35% 25% at 85% 20%, rgba(52,198,181,0.18), transparent 70%),
+          linear-gradient(180deg, #1a2236 0%, #0d1424 100%); }
+      #silhouette { position: absolute; left: 90px; bottom: 0; width: 900px; height: 1250px; }
+      #ph-tag { position: absolute; top: 380px; left: 260px; width: 560px; padding: 14px 0; border: 3px dashed rgba(247,241,229,0.35); border-radius: 18px; text-align: center; font-size: 30px; font-weight: 700; color: rgba(247,241,229,0.6); }
+      #shade { position: absolute; left: 0; right: 0; bottom: 0; height: 900px; background: linear-gradient(0deg, rgba(5,9,18,0.92) 0%, rgba(5,9,18,0) 100%); }
+
+      /* ---------- persistent chrome ---------- */
+      #credit { position: absolute; top: 170px; left: 0; right: 0; display: flex; justify-content: center; }
+      #credit-pill { display: flex; align-items: center; gap: 16px; padding: 16px 34px; border-radius: 60px; background: rgba(11,19,34,0.82); border: 2px solid rgba(247,241,229,0.14); font-size: 32px; font-weight: 700; }
+      #credit-dot { width: 18px; height: 18px; border-radius: 50%; background: var(--acc); }
+      #credit-sub { color: var(--mut); font-weight: 400; }
+      #topic { position: absolute; top: 268px; left: 0; right: 0; display: flex; justify-content: center; }
+      #topic-chip { padding: 12px 30px; border-radius: 14px; background: var(--acc); color: #1a1406; font-size: 38px; font-weight: 900; }
+      #bar-track { position: absolute; left: 70px; right: 70px; bottom: 300px; height: 8px; border-radius: 4px; background: rgba(247,241,229,0.15); overflow: hidden; }
+      #bar-fill { width: 100%; height: 100%; background: var(--acc); transform-origin: right center; }
+
+      /* ---------- captions ---------- */
+      .cap { position: absolute; left: 0; right: 0; top: 1240px; display: flex; justify-content: center; }
+      .cap-card { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 20px; max-width: 860px; padding: 26px 44px; border-radius: 30px; background: rgba(11,19,34,0.86); border: 2px solid rgba(247,241,229,0.1); box-shadow: 0 20px 60px rgba(0,0,0,0.45); }
+      .w { display: block; font-size: 64px; font-weight: 900; line-height: 1.35; color: rgba(247,241,229,0.4); }
+      .w.key { padding: 0 14px; margin: 0 6px; border-radius: 14px; }
+      #demo-tag { position: absolute; top: 1160px; left: 0; right: 0; text-align: center; font-size: 26px; color: rgba(247,241,229,0.6); }
+
+      /* ---------- verse motion graphic ---------- */
+      #verse { background: radial-gradient(90% 60% at 50% 50%, #17294a 0%, #070c17 80%); }
+      #verse-frame { position: relative; width: 900px; padding: 90px 50px; display: flex; flex-direction: column; align-items: center; }
+      .vline { width: 100%; height: 4px; background: linear-gradient(90deg, transparent, var(--acc), transparent); }
+      #verse-text { font-family: "AmiriQuran", serif; font-size: 84px; line-height: 2.1; text-align: center; color: var(--ink); margin: 50px 0; }
+      #verse-ref { font-size: 36px; font-weight: 700; color: var(--acc); }
+      .spark { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: var(--acc); }
+
+      /* ---------- end card ---------- */
+      #outro { background: linear-gradient(180deg, #0f1c33 0%, var(--bg) 100%); }
+      #outro-ring { width: 260px; height: 260px; border-radius: 50%; border: 10px solid var(--acc); display: flex; align-items: center; justify-content: center; margin-bottom: 60px; }
+      #outro-mic { width: 120px; height: 160px; }
+      #outro-src { font-size: 40px; font-weight: 700; color: var(--mut); margin-bottom: 18px; }
+      #outro-name { font-family: "Lalezar", "Tajawal", sans-serif; font-size: 130px; line-height: 1.2; color: var(--ink); }
+      #outro-chan { font-size: 52px; font-weight: 700; color: var(--acc); margin-top: 10px; }
+      #outro-sep { width: 420px; height: 4px; background: rgba(247,241,229,0.2); margin: 60px 0 50px; }
+      .outro-row { font-size: 40px; font-weight: 700; color: var(--ink); margin: 10px 0; }
+      .outro-row span { color: var(--mut); font-weight: 400; }
+      #outro-follow { margin-top: 90px; padding: 22px 54px; border-radius: 60px; background: var(--acc2); color: #04201c; font-size: 44px; font-weight: 900; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="24" data-width="1080" data-height="1920">
+      <audio id="sfx" src="sfx.wav" data-start="0" data-duration="24" data-volume="0.9"></audio>
+
+      <!-- 1) Hook -->
+      <section id="hook" class="clip center" data-start="0" data-duration="3.1" data-track-index="1">
+        <div id="hook-rays"></div>
+        <div id="hook-kicker">من حلقة: مهارة الصبر</div>
+        <div class="hook-line"><span class="hw" id="hw1">ليش</span><span class="hw" id="hw2">ناس</span><span class="hw" id="hw3">تصبر…</span></div>
+        <div class="hook-line"><span class="hw" id="hw4">وناس</span><span class="hw hot" id="hw5">تنهار؟</span></div>
+        <div id="hook-under"></div>
+      </section>
+
+      <!-- 2) Speaker (placeholder for the cropped 9:16 episode footage) -->
+      <section id="speaker" class="clip" data-start="3.1" data-duration="15.9" data-track-index="2">
+        <div id="studio"></div>
+        <svg id="silhouette" viewBox="0 0 900 1250" aria-hidden="true">
+          <defs>
+            <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#2b3954" />
+              <stop offset="1" stop-color="#121a2b" />
+            </linearGradient>
+          </defs>
+          <ellipse cx="450" cy="380" rx="170" ry="200" fill="url(#sg)" />
+          <path d="M120 1250 C120 900 260 690 450 690 C640 690 780 900 780 1250 Z" fill="url(#sg)" />
+          <rect x="560" y="640" width="70" height="170" rx="35" fill="#0a0f1b" />
+          <rect x="588" y="800" width="14" height="300" fill="#0a0f1b" />
+        </svg>
+        <div id="ph-tag">هنا لقطة الضيف من الحلقة</div>
+        <div id="shade"></div>
+      </section>
+
+      <!-- captions (demo copy: real reels use the guest's own words, word-timed) -->
+      <section id="cap1" class="clip" data-start="3.3" data-duration="5.6" data-track-index="5">
+        <div id="demo-tag">نص تجريبي · بالريل الحقيقي كلام الضيف بصوته</div>
+        <div class="cap"><div class="cap-card">
+          <span class="w" id="a1">هنا</span><span class="w" id="a2">يطلع</span><span class="w" id="a3">كلام</span><span class="w key" id="a4">الضيف</span><span class="w" id="a5">كلمة</span><span class="w" id="a6">بكلمة</span><span class="w" id="a7">مع</span><span class="w" id="a8">صوته</span>
+        </div></div>
+      </section>
+      <section id="cap2" class="clip" data-start="13.2" data-duration="5.6" data-track-index="5">
+        <div class="cap"><div class="cap-card">
+          <span class="w" id="b1">والكلمة</span><span class="w" id="b2">المهمة</span><span class="w key" id="b3">تتلوّن</span><span class="w" id="b4">وتكبر</span><span class="w" id="b5">عشان</span><span class="w" id="b6">تثبت</span><span class="w" id="b7">بالذاكرة</span>
+        </div></div>
+      </section>
+
+      <!-- 3) Motion graphic: verse card -->
+      <section id="verse" class="clip center" data-start="9.0" data-duration="4.2" data-track-index="4">
+        <div id="verse-frame">
+          <div class="vline" id="vl1"></div>
+          <div id="verse-text">﴿إِنَّمَا يُوَفَّى الصَّابِرُونَ أَجْرَهُم بِغَيْرِ حِسَابٍ﴾</div>
+          <div id="verse-ref">سورة الزمر - آية ١٠</div>
+          <div class="vline" id="vl2" style="margin-top: 50px"></div>
+        </div>
+        <div class="spark" id="sp1" style="left: 150px; top: 520px"></div>
+        <div class="spark" id="sp2" style="left: 900px; top: 640px"></div>
+        <div class="spark" id="sp3" style="left: 220px; top: 1350px"></div>
+        <div class="spark" id="sp4" style="left: 860px; top: 1280px"></div>
+        <div class="spark" id="sp5" style="left: 540px; top: 420px"></div>
+      </section>
+
+      <!-- persistent credit + topic + progress -->
+      <section id="chrome" class="clip" data-start="3.1" data-duration="15.9" data-track-index="6">
+        <div id="credit"><div id="credit-pill"><div id="credit-dot"></div><div>بودكاست أرواق</div><div id="credit-sub">· إذاعة مختلف</div></div></div>
+        <div id="topic"><div id="topic-chip">الصبر قوّة مو ضعف</div></div>
+        <div id="bar-track"><div id="bar-fill"></div></div>
+      </section>
+
+      <!-- 4) End card -->
+      <section id="outro" class="clip center" data-start="19.0" data-duration="5" data-track-index="7">
+        <div id="outro-ring">
+          <svg id="outro-mic" viewBox="0 0 120 160" aria-hidden="true">
+            <rect x="35" y="5" width="50" height="90" rx="25" fill="#f0b93f" />
+            <path d="M15 70 C15 115 105 115 105 70" stroke="#f0b93f" stroke-width="8" fill="none" />
+            <rect x="56" y="110" width="8" height="35" fill="#f0b93f" />
+            <rect x="35" y="145" width="50" height="8" rx="4" fill="#f0b93f" />
+          </svg>
+        </div>
+        <div id="outro-src">المقطع من</div>
+        <div id="outro-name">بودكاست أرواق</div>
+        <div id="outro-chan">إذاعة مختلف</div>
+        <div id="outro-sep"></div>
+        <div class="outro-row" id="or1"><span>الضيف: </span>الشيخ عبدالرحمن البهلي</div>
+        <div class="outro-row" id="or2"><span>تقديم: </span>سلمان خياط</div>
+        <div id="outro-follow">تابعنا لمقاطع أكثر</div>
+      </section>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      // --- hook: word slams ---
+      tl.fromTo("#hook-rays", { rotation: 0, opacity: 0 }, { rotation: 25, opacity: 1, duration: 3.1, ease: "none" }, 0);
+      tl.fromTo("#hook-kicker", { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 0.1);
+      const hookAt = [0.35, 0.6, 0.85, 1.4, 1.75];
+      ["#hw1", "#hw2", "#hw3", "#hw4", "#hw5"].forEach((id, i) => {
+        tl.fromTo(id, { scale: 1.9, opacity: 0, y: 30 }, { scale: 1, opacity: 1, y: 0, duration: 0.32, ease: "back.out(2.2)" }, hookAt[i]);
+      });
+      tl.fromTo("#hw5", { rotation: 0 }, { rotation: -4, duration: 0.12, yoyo: true, repeat: 3, ease: "sine.inOut" }, 2.1);
+      tl.fromTo("#hook-under", { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power3.out" }, 2.0);
+      tl.to(".hook-line, #hook-kicker, #hook-under", { scale: 1.08, opacity: 0, duration: 0.3, ease: "power2.in" }, 2.8);
+
+      // --- speaker: slow push-in (stand-in for footage reframing) ---
+      tl.fromTo("#studio", { scale: 1, x: 0 }, { scale: 1.12, x: -30, duration: 15.9, ease: "none" }, 3.1);
+      tl.fromTo("#silhouette", { scale: 1, y: 40 }, { scale: 1.07, y: 0, duration: 15.9, ease: "none", transformOrigin: "50% 100%" }, 3.1);
+      tl.fromTo("#ph-tag", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 3.4);
+
+      // --- chrome ---
+      tl.fromTo("#credit-pill", { y: -60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 3.2);
+      tl.fromTo("#topic-chip", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.45, ease: "back.out(2)" }, 3.45);
+      tl.fromTo("#bar-fill", { scaleX: 0 }, { scaleX: 1, duration: 15.9, ease: "none" }, 3.1);
+
+      // --- captions: word-by-word karaoke ---
+      function karaoke(prefix, n, start, step, keyIdx) {
+        for (let i = 1; i <= n; i++) {
+          const at = start + (i - 1) * step;
+          const isKey = i === keyIdx;
+          tl.fromTo(`#${prefix}${i}`, { color: "rgba(247,241,229,0.4)", backgroundColor: "rgba(240,185,63,0)", scale: 1 },
+            { color: isKey ? "#1a1406" : "#f7f1e5", backgroundColor: isKey ? "rgba(240,185,63,1)" : "rgba(240,185,63,0)", scale: isKey ? 1.06 : 1.08, duration: 0.14, ease: "power2.out" }, at);
+          if (!isKey) tl.to(`#${prefix}${i}`, { scale: 1, duration: 0.2, ease: "power2.out" }, at + 0.16);
+        }
+      }
+      tl.fromTo("#cap1 .cap-card", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "power3.out" }, 3.3);
+      tl.fromTo("#demo-tag", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 3.5);
+      karaoke("a", 8, 3.6, 0.55, 4);
+      tl.fromTo("#cap2 .cap-card", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "power3.out" }, 13.2);
+      karaoke("b", 7, 13.5, 0.62, 3);
+
+      // --- verse motion graphic ---
+      tl.fromTo("#verse-frame", { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: "power3.out" }, 9.0);
+      tl.fromTo("#vl1", { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "power2.inOut" }, 9.1);
+      tl.fromTo("#vl2", { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "power2.inOut" }, 9.3);
+      tl.fromTo("#verse-text", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, ease: "power3.out" }, 9.3);
+      tl.fromTo("#verse-ref", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 10.1);
+      ["#sp1", "#sp2", "#sp3", "#sp4", "#sp5"].forEach((id, i) => {
+        tl.fromTo(id, { scale: 0, opacity: 0, y: 0 }, { scale: 1.6, opacity: 0.9, duration: 0.5, ease: "power2.out" }, 9.4 + i * 0.25);
+        tl.to(id, { y: -120, opacity: 0, duration: 2.2, ease: "sine.out" }, 9.9 + i * 0.25);
+      });
+
+      // --- outro ---
+      tl.fromTo("#outro-ring", { scale: 0, rotation: -90 }, { scale: 1, rotation: 0, duration: 0.6, ease: "back.out(1.8)" }, 19.1);
+      tl.fromTo("#outro-src", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 19.5);
+      tl.fromTo("#outro-name", { y: 50, opacity: 0, scale: 1.2 }, { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, 19.65);
+      tl.fromTo("#outro-chan", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 19.95);
+      tl.fromTo("#outro-sep", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power2.inOut" }, 20.1);
+      tl.fromTo("#or1", { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 20.3);
+      tl.fromTo("#or2", { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 20.5);
+      tl.fromTo("#outro-follow", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "back.out(2)" }, 20.9);
+      tl.fromTo("#outro-follow", { scale: 1 }, { scale: 1.06, duration: 0.5, yoyo: true, repeat: 3, ease: "sine.inOut" }, 21.5);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
