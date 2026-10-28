@@ -1,11 +1,21 @@
 import {Composition} from 'remotion';
 import {sampleMeaning, sampleStory, type WordProps} from './data';
-import {FPS, getTimeline} from './timing';
+import {getAudioDurationInSeconds} from '@remotion/media-utils';
+import {staticFile} from 'remotion';
+import {FPS, getTimeline, voiceFiles} from './timing';
 import {WordVideo} from './WordVideo';
 
-const calc = ({props}: {props: WordProps}) => ({
-	durationInFrames: getTimeline(props).total,
-});
+const calc = async ({props}: {props: WordProps}) => {
+	const voiceFrames = props.voice
+		? await Promise.all(
+				voiceFiles(props).map(async (f) =>
+					Math.ceil((await getAudioDurationInSeconds(staticFile(f))) * FPS),
+				),
+			)
+		: undefined;
+	const withVoice = {...props, voiceFrames};
+	return {durationInFrames: getTimeline(withVoice).total, props: withVoice};
+};
 
 export const Root: React.FC = () => (
 	<>

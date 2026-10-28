@@ -1,5 +1,8 @@
 import {
 	AbsoluteFill,
+	Audio,
+	Sequence,
+	staticFile,
 	Easing,
 	interpolate,
 	spring,
@@ -8,7 +11,7 @@ import {
 } from 'remotion';
 import type {WordProps} from './data';
 import {loadFonts} from './fonts';
-import {LINE_GAP, getTimeline} from './timing';
+import {getTimeline, voiceFiles} from './timing';
 
 loadFonts();
 
@@ -117,15 +120,18 @@ const Label: React.FC<{label: string; episode: number}> = ({label, episode}) => 
 	);
 };
 
-const Word: React.FC<{word: string; subtitle: string; linesStart: number}> = ({
-	word,
-	subtitle,
-	linesStart,
-}) => {
+const Word: React.FC<{
+	word: string;
+	subtitle: string;
+	wordCue: number;
+	subtitleCue: number;
+	linesStart: number;
+}> = ({word, subtitle, wordCue, subtitleCue, linesStart}) => {
 	const frame = useCurrentFrame();
 	const {fps} = useVideoConfig();
-	const enter = spring({frame: frame - 10, fps, config: {damping: 14, mass: 0.9}});
-	const blur = interpolate(frame, [10, 35], [18, 0], clamp);
+	// الكلمة تطلع مع نطقها
+	const enter = spring({frame: frame - (wordCue - 4), fps, config: {damping: 14, mass: 0.9}});
+	const blur = interpolate(frame, [wordCue - 4, wordCue + 20], [18, 0], clamp);
 	// بعد ما تثبت، تطلع الكلمة فوق وتصغر عشان تفسح للمعنى
 	const lift = interpolate(frame, [linesStart - 20, linesStart + 10], [0, 1], {
 		...clamp,
@@ -133,8 +139,8 @@ const Word: React.FC<{word: string; subtitle: string; linesStart: number}> = ({
 	});
 	const y = interpolate(lift, [0, 1], [760, 460]);
 	const scale = interpolate(enter, [0, 1], [0.6, 1]) * interpolate(lift, [0, 1], [1, 0.62]);
-	const sub = interpolate(frame, [40, 60], [0, 1], clamp);
-	const star = interpolate(frame, [0, 40], [0, 1], clamp) * interpolate(lift, [0, 1], [0.22, 0.1]);
+	const sub = interpolate(frame, [subtitleCue - 4, subtitleCue + 14], [0, 1], clamp);
+	const star = interpolate(frame, [wordCue - 10, wordCue + 30], [0, 1], clamp) * interpolate(lift, [0, 1], [0.22, 0.1]);
 
 	return (
 		<div
@@ -196,9 +202,9 @@ const Word: React.FC<{word: string; subtitle: string; linesStart: number}> = ({
 	);
 };
 
-const Lines: React.FC<{lines: string[]; start: number; end: number; mode: WordProps['mode']}> = ({
+const Lines: React.FC<{lines: string[]; cues: number[]; end: number; mode: WordProps['mode']}> = ({
 	lines,
-	start,
+	cues,
 	end,
 	mode,
 }) => {
@@ -219,11 +225,13 @@ const Lines: React.FC<{lines: string[]; start: number; end: number; mode: WordPr
 			}}
 		>
 			{lines.map((line, i) => {
-				const s = start + 10 + i * LINE_GAP;
+				// كل سطر يطلع مع نطقه
+				const s = cues[i] - 4;
 				const t = interpolate(frame, [s, s + 22], [0, 1], {...clamp, easing: ease});
-				// السطر الحالي واضح، والقديم يخفت شوي
-				const dim = interpolate(frame, [s + LINE_GAP, s + LINE_GAP + 15], [1, 0.55], clamp);
 				const isLast = i === lines.length - 1;
+				// السطر الحالي واضح، والقديم يخفت شوي لما يبدأ اللي بعده
+				const next = isLast ? end : cues[i + 1] - 4;
+				const dim = interpolate(frame, [next, next + 15], [1, 0.55], clamp);
 				return (
 					<div
 						key={i}
@@ -353,8 +361,14 @@ export const WordVideo: React.FC<WordProps> = (props) => {
 		<AbsoluteFill style={{opacity: fadeOut}}>
 			<Background />
 			<Label label={props.label} episode={props.episode} />
-			<Word word={props.word} subtitle={props.subtitle} linesStart={tl.linesStart} />
-			<Lines lines={props.lines} start={tl.linesStart} end={tl.linesEnd} mode={props.mode} />
+			<Word
+				word={props.word}
+				subtitle={props.subtitle}
+				wordCue={tl.wordCue}
+				subtitleCue={tl.subtitleCue}
+				linesStart={tl.linesStart}
+			/>
+			<Lines lines={props.lines} cues={tl.lineCues} end={tl.linesEnd} mode={props.mode} />
 			{props.example ? (
 				<Example
 					text={props.example}
@@ -364,6 +378,13 @@ export const WordVideo: React.FC<WordProps> = (props) => {
 				/>
 			) : null}
 			<Outro text={props.outro} handle={props.handle} start={tl.outroStart} />
+			{props.voice
+				? voiceFiles(props).map((f, i) => (
+						<Sequence key={f} from={tl.cues[i]}>
+							<Audio src={staticFile(f)} />
+						</Sequence>
+					))
+				: null}
 		</AbsoluteFill>
 	);
 };
